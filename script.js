@@ -1,5 +1,5 @@
 const appState = {
-    users: ["Ardit", "Elira"],
+    users: ["Ardit", "Elira", "Besa"],
 };
 
 function updateUserCount(badgeElement) {
@@ -26,6 +26,7 @@ function renderUsers(listElement) {
                 <div class="user-item-name">${name}</div>
                 <div class="user-item-meta">User #${index + 1}</div>
             </div>
+            <button type="button" data-delete-user="${index}">Delete</button>
         `;
         listElement.appendChild(listItem);
     });
@@ -44,6 +45,12 @@ function addUser(inputElement, listElement, badgeElement) {
     renderUsers(listElement);
     updateUserCount(badgeElement);
     inputElement.focus();
+}
+
+function deleteUser(userIndex, listElement, badgeElement) {
+    appState.users = appState.users.filter((_, index) => index !== userIndex);
+    renderUsers(listElement);
+    updateUserCount(badgeElement);
 }
 
 function bootUserDashboard() {
@@ -68,6 +75,16 @@ function bootUserDashboard() {
             event.preventDefault();
             addUser(inputElement, listElement, badgeElement);
         }
+    });
+
+    listElement.addEventListener("click", (event) => {
+        const deleteButton = event.target.closest("[data-delete-user]");
+
+        if (!deleteButton) {
+            return;
+        }
+
+        deleteUser(Number(deleteButton.dataset.deleteUser), listElement, badgeElement);
     });
 }
 
