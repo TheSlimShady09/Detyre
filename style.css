@@ -418,11 +418,26 @@ img {
     box-shadow: 0 16px 32px rgba(24, 49, 83, 0.2);
 }
 
-.dashboard-controls {
+.dashboard-form {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
     gap: 1rem;
     margin-bottom: 1.25rem;
+}
+
+.dashboard-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.dashboard-controls {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+}
+
+.dashboard-controls label {
+    font-weight: 600;
 }
 
 .dashboard-controls input {
@@ -438,6 +453,11 @@ img {
 .dashboard-controls input:focus {
     outline: 2px solid rgba(184, 79, 53, 0.26);
     border-color: rgba(184, 79, 53, 0.42);
+}
+
+.dashboard-listing h3 {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
 }
 
 .user-list {
@@ -603,6 +623,10 @@ img {
 
     .feature-grid {
         grid-template-columns: 1fr;
+    }
+
+    .dashboard-actions {
+        width: 100%;
     }
 
     .dashboard-controls {
