@@ -1,5 +1,5 @@
 const appState = {
-    users: ["Ardit", "Elira"],
+    users: ["Ardit", "Elira", "Jon", "Sara"],
 };
 
 function updateUserCount(badgeElement) {
