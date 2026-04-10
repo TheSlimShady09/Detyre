@@ -1,3 +1,3 @@
 # Detyre
 
-Website prezantues per nje kompani ose biznes.
+User Dashboard Web App + Git Merge Conflict
