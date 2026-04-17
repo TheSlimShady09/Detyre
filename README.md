@@ -1,3 +1,3 @@
 # Detyre
 
-User Dashboard Web App + Git Merge Conflict
+MINI HACKATHON – TEAM TASK MANAGER
