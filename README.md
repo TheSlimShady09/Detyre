@@ -1,4 +1,4 @@
-# Team Task Manager
+# MINI HACKATHON - TEAM TASK MANAGER
 
 Projekt i realizuar per detyren `Mini Hackathon - Team Task Manager`.
 
