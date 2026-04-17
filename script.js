@@ -120,7 +120,7 @@ function addTask(taskText) {
     tasks.unshift(task);
     saveTasks();
     renderTasks();
-    setFormMessage(`Detyra "${cleanTask}" u shtua nga moduli HTML.`, "success");
+    setFormMessage(`Detyra "${cleanTask}" u shtua me sukses.`, "success");
     elements.taskInput.value = "";
     elements.taskInput.focus();
 
