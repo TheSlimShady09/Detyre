@@ -1,91 +1,180 @@
-const appState = {
-    users: ["Ardit", "Elira", "Besa", "Jon", "Sara"],
-};
+const STORAGE_KEY = "mini-hackathon-task-manager";
 
-function updateUserCount(badgeElement) {
-    if (!badgeElement) {
-        return;
+let tasks = loadTasks();
+let elements = {};
+
+function loadTasks() {
+    try {
+        const savedTasks = localStorage.getItem(STORAGE_KEY);
+        return savedTasks ? JSON.parse(savedTasks) : [];
+    } catch (error) {
+        return [];
     }
-
-    const total = appState.users.length;
-    badgeElement.textContent = `${total} ${total === 1 ? "user" : "users"}`;
 }
 
-function renderUsers(listElement) {
-    if (!listElement) {
-        return;
+function saveTasks() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    } catch (error) {
+        // Ignore storage errors so the app keeps working even without persistence.
+    }
+}
+
+function createTaskId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
     }
 
-    listElement.innerHTML = "";
+    return String(Date.now() + Math.floor(Math.random() * 1000));
+}
 
-    appState.users.forEach((name, index) => {
-        const listItem = document.createElement("li");
-        listItem.className = "user-item";
-        listItem.innerHTML = `
-            <div>
-                <div class="user-item-name">${name}</div>
-                <div class="user-item-meta">User #${index + 1}</div>
-            </div>
-            <button type="button" data-delete-user="${index}">Delete</button>
-        `;
-        listElement.appendChild(listItem);
+function formatTaskCount(count) {
+    return `${count} ${count === 1 ? "detyre" : "detyra"}`;
+}
+
+function formatTaskDate(dateString) {
+    const date = new Date(dateString);
+
+    return new Intl.DateTimeFormat("sq-AL", {
+        dateStyle: "medium",
+        timeStyle: "short",
+    }).format(date);
+}
+
+function setFormMessage(message, type = "") {
+    elements.formMessage.textContent = message;
+    elements.formMessage.className = "form-message";
+
+    if (type) {
+        elements.formMessage.classList.add(`is-${type}`);
+    }
+}
+
+function updateDashboard() {
+    const total = tasks.length;
+
+    elements.totalTasks.textContent = total;
+    elements.taskBadge.textContent = formatTaskCount(total);
+    elements.lastUpdate.textContent = total
+        ? `Detyra e fundit u shtua me ${formatTaskDate(tasks[0].createdAt)}`
+        : "Lista eshte bosh";
+
+    elements.emptyState.classList.toggle("is-hidden", total > 0);
+}
+
+function createTaskElement(task) {
+    const item = document.createElement("li");
+    item.className = "task-item";
+
+    const row = document.createElement("div");
+    row.className = "task-row";
+
+    const content = document.createElement("div");
+
+    const title = document.createElement("p");
+    title.className = "task-title";
+    title.textContent = task.text;
+
+    const meta = document.createElement("p");
+    meta.className = "task-meta";
+    meta.textContent = `Shtuar: ${formatTaskDate(task.createdAt)}`;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "delete-button";
+    deleteButton.dataset.taskId = task.id;
+    deleteButton.textContent = "Delete";
+
+    content.append(title, meta);
+    row.append(content, deleteButton);
+    item.appendChild(row);
+
+    return item;
+}
+
+function renderTasks() {
+    elements.taskList.innerHTML = "";
+
+    tasks.forEach((task) => {
+        elements.taskList.appendChild(createTaskElement(task));
     });
+
+    updateDashboard();
 }
 
-function addUser(inputElement, listElement, badgeElement) {
-    const nextUser = inputElement.value.trim();
+function addTask(taskText) {
+    const cleanTask = taskText.trim();
 
-    if (!nextUser) {
-        inputElement.focus();
+    if (!cleanTask) {
+        setFormMessage("Shkruaj nje detyre para se ta shtosh.", "error");
+        elements.taskInput.focus();
+        return false;
+    }
+
+    const task = {
+        id: createTaskId(),
+        text: cleanTask,
+        createdAt: new Date().toISOString(),
+    };
+
+    tasks.unshift(task);
+    saveTasks();
+    renderTasks();
+    setFormMessage(`Detyra "${cleanTask}" u shtua me sukses.`, "success");
+    elements.taskInput.value = "";
+    elements.taskInput.focus();
+
+    return true;
+}
+
+function deleteTask(taskId) {
+    tasks = tasks.filter((task) => task.id !== taskId);
+    saveTasks();
+    renderTasks();
+    setFormMessage("Detyra u fshi nga lista.", "success");
+}
+
+function bootTaskManager() {
+    elements = {
+        form: document.getElementById("task-form"),
+        taskInput: document.getElementById("task-input"),
+        taskList: document.getElementById("task-list"),
+        formMessage: document.querySelector("[data-form-message]"),
+        totalTasks: document.querySelector("[data-total-tasks]"),
+        lastUpdate: document.querySelector("[data-last-update]"),
+        taskBadge: document.querySelector("[data-task-badge]"),
+        emptyState: document.querySelector("[data-empty-state]"),
+    };
+
+    if (
+        !elements.form ||
+        !elements.taskInput ||
+        !elements.taskList ||
+        !elements.formMessage ||
+        !elements.totalTasks ||
+        !elements.lastUpdate ||
+        !elements.taskBadge ||
+        !elements.emptyState
+    ) {
         return;
     }
 
-    appState.users.push(nextUser);
-    inputElement.value = "";
-    renderUsers(listElement);
-    updateUserCount(badgeElement);
-    inputElement.focus();
-}
+    renderTasks();
 
-function deleteUser(userIndex, listElement, badgeElement) {
-    appState.users = appState.users.filter((_, index) => index !== userIndex);
-    renderUsers(listElement);
-    updateUserCount(badgeElement);
-}
-
-function bootUserDashboard() {
-    const listElement = document.querySelector("[data-user-list]");
-    const inputElement = document.querySelector("[data-user-input]");
-    const addButton = document.querySelector("[data-add-user]");
-    const badgeElement = document.querySelector("[data-user-count]");
-
-    if (!listElement || !inputElement || !addButton) {
-        return;
-    }
-
-    renderUsers(listElement);
-    updateUserCount(badgeElement);
-
-    addButton.addEventListener("click", () => {
-        addUser(inputElement, listElement, badgeElement);
+    elements.form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        addTask(elements.taskInput.value);
     });
 
-    inputElement.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            addUser(inputElement, listElement, badgeElement);
-        }
-    });
-
-    listElement.addEventListener("click", (event) => {
-        const deleteButton = event.target.closest("[data-delete-user]");
+    elements.taskList.addEventListener("click", (event) => {
+        const deleteButton = event.target.closest("[data-task-id]");
 
         if (!deleteButton) {
             return;
         }
 
-        deleteUser(Number(deleteButton.dataset.deleteUser), listElement, badgeElement);
+        deleteTask(deleteButton.dataset.taskId);
     });
 }
 
-document.addEventListener("DOMContentLoaded", bootUserDashboard);
+document.addEventListener("DOMContentLoaded", bootTaskManager);
